@@ -14,8 +14,7 @@ def main():
     # test_postgres = check_postgres_connection()
     # test_ironmq = check_ironmq_connection()
     return f'''
-    <h1>{test_postgres}</h1>
-    <h1>{test_ironmq}</h1>
+    <h1>hi</h1>
     '''
 
 def check_postgres_connection():
