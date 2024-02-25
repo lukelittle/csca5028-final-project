@@ -11,10 +11,10 @@ app = Flask(__name__)
 
 @app.route("/")
 def main():
-    # test_postgres = check_postgres_connection()
-    # test_ironmq = check_ironmq_connection()
+    test_postgres = check_postgres_connection()
+    test_ironmq = check_ironmq_connection()
     return f'''
-    <h1>hi</h1>
+    <h1>{test_postgres} and {test_ironmq}</h1>
     '''
 
 def check_postgres_connection():
