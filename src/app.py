@@ -31,7 +31,7 @@ def check_postgres_connection():
 
 def check_ironmq_connection():
     try:
-        ironmq = IronMQ(host="mq-aws-us-east-1-1.iron.io", project_id=os.environ.get("IRONMQ_PROJECT_ID"), token=os.environ.get("IRONMQ_TOKEN"))
+        ironmq = IronMQ(host="mq-aws-eu-west-1-1.iron.io", project_id=os.environ.get("IRONMQ_PROJECT_ID"), token=os.environ.get("IRONMQ_TOKEN"))
         queue = ironmq.queue("test_queue")
         info = queue.info()
         return "Successful" if info else "Failed"
