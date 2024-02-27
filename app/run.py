@@ -4,7 +4,29 @@ from flask import Flask, render_template, request, redirect, url_for
 # from flask_sqlalchemy import SQLAlchemy
 import os
 
-# from app.models.three_day_avg_visibility import ThreeDayAverageVisibility
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Date, Float
+
+Base = declarative_base()
+
+class VisibilityData(Base):
+    __tablename__ = 'visibility_data'
+    id = Column(Integer, primary_key=True)
+    station = Column(String, nullable=False)
+    date = Column(Date, nullable=False)
+    visibility = Column(Float)
+
+    def __repr__(self):
+        return f"<VisibilityData(station='{self.station}', date='{self.date}', visibility={self.visibility})>"
+
+class ThreeDayAverageVisibility(Base):
+    __tablename__ = 'three_day_average_visibility'
+    id = Column(Integer, primary_key=True)
+    station = Column(String, nullable=False)
+    average_visibility = Column(Float)
+
+    def __repr__(self):
+        return f"<ThreeDayAverageVisibility(station='{self.station}', average_visibility={self.average_visibility})>"
 
 app = Flask(__name__)
 

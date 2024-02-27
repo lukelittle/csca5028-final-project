@@ -2,10 +2,36 @@ import requests
 import datetime
 import json
 import os
+import logging
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
-from app.models.visibility_data import VisibilityData, Base
 from iron_mq import IronMQ
+
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Date, Float
+
+logging.basicConfig(level=logging.DEBUG)
+
+Base = declarative_base()
+
+class VisibilityData(Base):
+    __tablename__ = 'visibility_data'
+    id = Column(Integer, primary_key=True)
+    station = Column(String, nullable=False)
+    date = Column(Date, nullable=False)
+    visibility = Column(Float)
+
+    def __repr__(self):
+        return f"<VisibilityData(station='{self.station}', date='{self.date}', visibility={self.visibility})>"
+
+class ThreeDayAverageVisibility(Base):
+    __tablename__ = 'three_day_average_visibility'
+    id = Column(Integer, primary_key=True)
+    station = Column(String, nullable=False)
+    average_visibility = Column(Float)
+
+    def __repr__(self):
+        return f"<ThreeDayAverageVisibility(station='{self.station}', average_visibility={self.average_visibility})>"
 
 class QueueService:
     def __init__(self, mq_client, queue_name):
