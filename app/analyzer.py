@@ -42,7 +42,7 @@ class DatabaseService:
         with self.session_factory() as session:
             try:
                 end_date = date.today()
-                start_date = end_date - timedelta(days=2)  # Adjusted to include today and the past two days
+                start_date = end_date - timedelta(days=2) 
                 stations = session.query(VisibilityData.station).distinct()
                 for station in stations:
                     avg_visibility = self.calculate_avg(session, station.station, start_date, end_date)

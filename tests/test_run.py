@@ -17,7 +17,7 @@ class TestRun(unittest.TestCase):
         with app.app_context():
             db.create_all()
             sample_date = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
-            sample_data = VisibilityData(station='ABC', date=sample_date, visibility=5.5)
+            sample_data = VisibilityData(station='KJFK', date=sample_date, visibility=5.5)
             db.session.add(sample_data)
             db.session.commit()
 
@@ -31,9 +31,9 @@ class TestRun(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_query_visibility_with_station(self):
-        response = self.app.get('/query?station=ABC')
+        response = self.app.get('/query?station=KJFK')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'ABC', response.data)
+        self.assertIn(b'KJFK', response.data)
 
     def test_query_visibility_without_station(self):
         response = self.app.get('/query')
