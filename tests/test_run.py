@@ -1,45 +1,44 @@
-# import os
-# import unittest
-# from flask_testing import TestCase
-# from app.run import app, db
-# from app.models.three_day_avg_visibility import ThreeDayAverageVisibility
+import os
+import unittest
+from datetime import datetime
+from app.run import app, db, VisibilityData, ThreeDayAverageVisibility
 
+class TestRun(unittest.TestCase):
 
-# class TestConfig:
-#     TESTING = True
-#     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-#     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    def setUp(self):
+        self.app_context = app.app_context()
+        self.app_context.push()
 
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        self.app = app.test_client()
 
-# class TestRun(TestCase):
+        with app.app_context():
+            db.create_all()
+            sample_date = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
+            sample_data = VisibilityData(station='ABC', date=sample_date, visibility=5.5)
+            db.session.add(sample_data)
+            db.session.commit()
 
-#     def create_app(self):
-#         app.config.from_object(TestConfig)
-#         return app
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
 
-#     def setUp(self):
-#         db.create_all()
-#         db.session.add(ThreeDayAverageVisibility(station='TEST1', average_visibility=11.0))
-#         db.session.commit()
+    def test_main_page(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
 
-#     def tearDown(self):
-#         db.session.remove()
-#         db.drop_all()
+    def test_query_visibility_with_station(self):
+        response = self.app.get('/query?station=ABC')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'ABC', response.data)
 
-#     def test_main_route(self):
-#         response = self.client.get('/')
-#         self.assertEqual(response.status_code, 200)
-#         self.assertTrue('text/html' in response.content_type)
+    def test_query_visibility_without_station(self):
+        response = self.app.get('/query')
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('/' in response.location)
 
-#     def test_query_visibility_exists(self):
-#         response = self.client.get('/query?station=TEST1')
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn(b'10.0', response.data)
-
-#     def test_query_visibility_no_station(self):
-#         response = self.client.get('/query')
-#         self.assertRedirects(response, '/')
-
-
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()
