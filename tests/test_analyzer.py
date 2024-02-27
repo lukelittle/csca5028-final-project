@@ -13,11 +13,11 @@ class TestDatabaseService(unittest.TestCase):
     @patch('app.analyzer.func.avg', autospec=True)
     def test_calculate_avg(self, mock_avg):
         self.session_mock.query.return_value.filter.return_value.scalar.return_value = 10.0
-        result = self.database_service.calculate_avg(self.session_mock, "TEST_STATION", date.today() - timedelta(days=3), date.today())
+        result = self.database_service.calculate_avg(self.session_mock, "KJFK", date.today() - timedelta(days=3), date.today())
         self.assertEqual(result, 10.0)
 
     def test_update_or_create(self):
-        station_code = "TEST_STATION"
+        station_code = "KJFK"
         avg_visibility = 10.0
         self.database_service.update_or_create(self.session_mock, station_code, avg_visibility)
         self.assertTrue(self.session_mock.add.called or self.session_mock.query.return_value.filter_by.return_value.first.return_value is not None)
