@@ -1,2 +1,2 @@
-web: gunicorn src.app:run
+web: gunicorn app.run:app
 worker: python analyzer.py
