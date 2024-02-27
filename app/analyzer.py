@@ -82,8 +82,8 @@ class QueueService:
         response = self.mq_client.queue(self.queue_name).get()
         messages = response.get('messages', [])
         for message in messages:
+            logging.info(f"Received message: {message['id']}")
             yield message['body']
-            self.mq_client.queue(self.queue_name).delete(message['id'])
 
 if __name__ == "__main__":
     engine = create_engine(DATABASE_URL)
