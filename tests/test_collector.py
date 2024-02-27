@@ -20,3 +20,6 @@ class TestDataCollector(unittest.TestCase):
         visibility: float = DataCollector.get_visibility('FAKE_STATION_CODE')
         
         self.assertEqual(visibility, 10000)
+
+if __name__ == '__main__':
+    unittest.main()
