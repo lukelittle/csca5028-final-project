@@ -67,7 +67,7 @@ class DataCollector:
     def get_visibility(station_code):
         url = f'https://api.weather.gov/stations/{station_code}/observations/latest'
         try:
-            response = requests.get(url, headers={'User-Agent': 'your-user-agent'})
+            response = requests.get(url, headers={'User-Agent': 'csca5028-final-project/1.0'})
             data = response.json()
             return data['properties']['visibility']['value']
         except:
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     session = Session()
 
     ironmq_client = IronMQ(host="mq-aws-eu-west-1-1.iron.io", project_id=os.getenv("IRON_MQ_PROJECT_ID"), token=os.getenv("IRON_MQ_TOKEN"))
-    queue_service = QueueService(ironmq_client, "your-queue-name")
+    queue_service = QueueService(ironmq_client, "csca5028")
 
     data_collector = DataCollector(queue_service, session)
     station_codes = ['KATL', 'KDFW', 'KDEN', 'KORD', 'KLAX', 'KJFK', 'KLAS', 'KMCO', 'KMIA', 'KCLT', 'KSEA', 'KPHX', 'KEWR', 'KSFO', 'KIAH', 'KBOS', 'KFLL', 'KMSP', 'KLGA', 'KDTW']
