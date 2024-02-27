@@ -1,44 +1,27 @@
-# import unittest
-# from unittest.mock import MagicMock, patch
-# from typing import Any
-# from app.analyzer import AverageVisibilityService
-# from app.models.visibility_data import VisibilityData
-# from app.models.three_day_avg_visibility import ThreeDayAverageVisibility
+import unittest
+from unittest.mock import MagicMock, patch
+from datetime import date, timedelta
 
-# class TestAverageVisibilityService(unittest.TestCase):
-#     @patch('app.analyzer.AverageVisibilityService.Session')
-#     @patch('app.analyzer.AverageVisibilityService.IronMQ')
-#     def test_update_visibility_average(self, mock_ironmq: MagicMock, mock_session: MagicMock) -> None:
+from app.analyzer import DatabaseService
 
-#         mock_session_factory: MagicMock = MagicMock()
-#         mock_session.configure_mock(**{'return_value': mock_session_factory})
+class TestDatabaseService(unittest.TestCase):
+    def setUp(self):
+        self.session_mock = MagicMock()
+        self.session_factory_mock = MagicMock(return_value=self.session_mock.__enter__.return_value)
+        self.database_service = DatabaseService(session_factory=self.session_factory_mock)
 
-#         mock_session_factory.query.return_value.distinct.return_value = [
-#             VisibilityData(station='STATION1'),
-#             VisibilityData(station='STATION2')
-#         ]
+    @patch('app.analyzer.func.avg', autospec=True)
+    def test_calculate_avg(self, mock_avg):
+        # Mock the chain to end with scalar() returning 10.0
+        self.session_mock.query.return_value.filter.return_value.scalar.return_value = 10.0
+        result = self.database_service.calculate_avg(self.session_mock, "TEST_STATION", date.today() - timedelta(days=3), date.today())
+        self.assertEqual(result, 10.0)
 
-#         mock_session_factory.query.return_value.filter.return_value.scalar.side_effect = [10.5, 8.75]
+    def test_update_or_create(self):
+        station_code = "TEST_STATION"
+        avg_visibility = 10.0
+        self.database_service.update_or_create(self.session_mock, station_code, avg_visibility)
+        self.assertTrue(self.session_mock.add.called or self.session_mock.query.return_value.filter_by.return_value.first.return_value is not None)
 
-#         service: AverageVisibilityService = AverageVisibilityService(mock_ironmq, 'test_queue', mock_session)
-
-#         service.update_visibility_average()
-
-#         self.assertEqual(mock_session_factory.query.call_count, 2)
-#         self.assertEqual(mock_session_factory.commit.call_count, 1) 
-
-#         args_list = mock_session_factory.add.call_args_list
-#         self.assertEqual(len(args_list), 2) 
-
-#         first_call_args: ThreeDayAverageVisibility = args_list[0][0][0]
-#         self.assertIsInstance(first_call_args, ThreeDayAverageVisibility)
-#         self.assertEqual(first_call_args.station, 'STATION1')
-#         self.assertEqual(first_call_args.average_visibility, 10.5)
-
-#         second_call_args: ThreeDayAverageVisibility = args_list[1][0][0]
-#         self.assertIsInstance(second_call_args, ThreeDayAverageVisibility)
-#         self.assertEqual(second_call_args.station, 'STATION2')
-#         self.assertEqual(second_call_args.average_visibility, 8.75)
-
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()

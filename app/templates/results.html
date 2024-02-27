@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visibility Query Results</title>
+</head>
+<body>
+    <h1>Results for Station: {{ station }}</h1>
+    {% if results %}
+        <ul>
+        {% for result in results %}
+            <li>{{ result.station }}: {{ result.average_visibility }} km</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found for the given station code.</p>
+    {% endif %}
+    <a href="/">Back to Query</a>
+</body>
+</html>

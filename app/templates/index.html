@@ -2,9 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CSCA5028 Final Project</title>
+    <title>Query Visibility Data</title>
 </head>
 <body>
-    <h1>hello</h1>
+    <h1>Query Three-Day Average Visibility</h1>
+    <p>This application allows you to query the three-day average visibility for the 20 busiest airports in the United States. Please select an airport station from the dropdown list to view its visibility data.</p>
+    <form action="/query" method="get">
+        <label for="station">Select Station:</label>
+        <select id="station" name="station">
+            <option value="KATL">Hartsfield-Jackson Atlanta International Airport (KATL)</option>
+            <option value="KDFW">Dallas/Fort Worth International Airport (KDFW)</option>
+            <option value="KDEN">Denver International Airport (KDEN)</option>
+            <option value="KORD">Chicago O'Hare International Airport (KORD)</option>
+            <option value="KLAX">Los Angeles International Airport (KLAX)</option>
+            <option value="KJFK">John F. Kennedy International Airport (KJFK)</option>
+            <option value="KLAS">McCarran International Airport (KLAS)</option>
+            <option value="KMCO">Orlando International Airport (KMCO)</option>
+            <option value="KMIA">Miami International Airport (KMIA)</option>
+            <option value="KCLT">Charlotte Douglas International Airport (KCLT)</option>
+            <option value="KSEA">Seattle-Tacoma International Airport (KSEA)</option>
+            <option value="KPHX">Phoenix Sky Harbor International Airport (KPHX)</option>
+            <option value="KEWR">Newark Liberty International Airport (KEWR)</option>
+            <option value="KSFO">San Francisco International Airport (KSFO)</option>
+            <option value="KIAH">George Bush Intercontinental Airport (KIAH)</option>
+            <option value="KBOS">Logan International Airport (KBOS)</option>
+            <option value="KFLL">Fort Lauderdale-Hollywood International Airport (KFLL)</option>
+            <option value="KMSP">Minneapolis-Saint Paul International Airport (KMSP)</option>
+            <option value="KLGA">LaGuardia Airport (KLGA)</option>
+            <option value="KDTW">Detroit Metropolitan Airport (KDTW)</option>
+        </select>
+        <button type="submit">Query</button>
+    </form>
 </body>
 </html>

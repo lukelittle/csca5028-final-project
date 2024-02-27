@@ -1,81 +1,80 @@
-# import os
-# import logging
-# from datetime import date, timedelta
-# from typing import Any, Optional
-# from sqlalchemy import create_engine, func, and_
-# from sqlalchemy.orm import sessionmaker, Session
-# from iron_mq import IronMQ
-# from app.models.visibility_data import VisibilityData, Base
-# from app.models.three_day_avg_visibility import ThreeDayAverageVisibility
+import os
+import logging
+from datetime import date, timedelta
+from sqlalchemy import create_engine, func, and_
+from sqlalchemy.orm import sessionmaker
+from iron_mq import IronMQ
+from app.models.visibility_data import VisibilityData, Base
+from app.models.three_day_avg_visibility import ThreeDayAverageVisibility
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
-# class DatabaseService:
-#     def __init__(self, session_factory: sessionmaker) -> None:
-#         self.session_factory = session_factory
+class DatabaseService:
+    def __init__(self, session_factory):
+        self.session_factory = session_factory
 
-#     def update_three_day_avg_visibility(self) -> None:
-#         with self.session_factory() as session:
-#             try:
-#                 end_date = date.today()
-#                 start_date = end_date - timedelta(days=3)
-#                 for station in session.query(VisibilityData.station).distinct():
-#                     avg_visibility = self.calculate_avg_visibility(session, station.station, start_date, end_date)
-#                     self.update_or_create_avg_visibility(session, station.station, avg_visibility)
-#                 session.commit()
-#             except Exception as e:
-#                 logging.error(f"Database error during average visibility update: {e}")
+    def update_avg_visibility(self):
+        with self.session_factory() as session:
+            try:
+                end_date = date.today()
+                start_date = end_date - timedelta(days=2)  # Adjusted to include today and the past two days
+                stations = session.query(VisibilityData.station).distinct()
+                for station in stations:
+                    avg_visibility = self.calculate_avg(session, station.station, start_date, end_date)
+                    self.update_or_create(session, station.station, avg_visibility)
+                session.commit()
+            except Exception as e:
+                logging.error(f"Database error: {e}")
 
-#     @staticmethod
-#     def calculate_avg_visibility(session: Session, station_code: str, start_date: date, end_date: date) -> Optional[float]:
-#         return session.query(func.avg(VisibilityData.visibility))\
-#             .filter(and_(VisibilityData.station == station_code, VisibilityData.date >= start_date, VisibilityData.date <= end_date))\
-#             .scalar()
+    @staticmethod
+    def calculate_avg(session, station_code, start_date, end_date):
+        return session.query(func.avg(VisibilityData.visibility))\
+            .filter(VisibilityData.station == station_code, VisibilityData.date.between(start_date, end_date))\
+            .scalar()
 
-#     @staticmethod
-#     def update_or_create_avg_visibility(session: Session, station_code: str, avg_visibility: float) -> None:
-#         avg_vis_entry = session.query(ThreeDayAverageVisibility)\
-#             .filter_by(station=station_code).first()
-#         if avg_vis_entry:
-#             avg_vis_entry.average_visibility = avg_visibility
-#         else:
-#             session.add(ThreeDayAverageVisibility(station=station_code, average_visibility=avg_visibility))
+    @staticmethod
+    def update_or_create(session, station_code, avg_visibility):
+        record = session.query(ThreeDayAverageVisibility).filter_by(station=station_code).first()
+        if record:
+            record.average_visibility = avg_visibility
+        else:
+            session.add(ThreeDayAverageVisibility(station=station_code, average_visibility=avg_visibility))
 
-# class AverageVisibilityQueueService:
-#     def __init__(self, mq_client: IronMQ, queue_name: str, database_service: DatabaseService) -> None:
-#         self.mq_client = mq_client
-#         self.queue_name = queue_name
-#         self.database_service = database_service
+class QueueService:
+    def __init__(self, mq_client, queue_name, db_service):
+        self.mq_client = mq_client
+        self.queue_name = queue_name
+        self.db_service = db_service
 
-#     def listen_for_messages(self) -> None:
-#         while True:
-#             for message_body in self.subscribe():
-#                 logging.info(f"Processing message: {message_body}")
-#                 self.database_service.update_three_day_avg_visibility()
+    def listen_and_update(self):
+        while True:
+            messages = self.get_messages()
+            for message_body in messages:
+                logging.info(f"Message: {message_body}")
+                self.db_service.update_avg_visibility()
 
-#     def subscribe(self) -> Any:
-#         response = self.mq_client.queue(self.queue_name).get()
-#         messages = response.get('messages', [])
-#         for message in messages:
-#             yield message['body']
-#             self.mq_client.queue(self.queue_name).delete(message['id'])
+    def get_messages(self):
+        response = self.mq_client.queue(self.queue_name).get()
+        messages = response.get('messages', [])
+        for message in messages:
+            yield message['body']
+            self.mq_client.queue(self.queue_name).delete(message['id'])
 
 if __name__ == "__main__":
-    print("Hello, world!")
-    # DATABASE_URL = os.environ["DATABASE_URL"]
-    # engine = create_engine(DATABASE_URL)
-    # Session = sessionmaker(bind=engine)
+    DATABASE_URL = os.environ["DATABASE_URL"]
+    engine = create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
 
-    # Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
 
-    # ironmq_client = IronMQ(
-    #     host=os.environ["IRON_MQ_HOST"],
-    #     project_id=os.environ["IRON_MQ_PROJECT_ID"],
-    #     token=os.environ["IRON_MQ_TOKEN"]
-    # )
+    ironmq_client = IronMQ(
+        host=os.environ["IRON_MQ_HOST"],
+        project_id=os.environ["IRON_MQ_PROJECT_ID"],
+        token=os.environ["IRON_MQ_TOKEN"]
+    )
 
-    # queue_name = "csca5028"
-    # database_service = DatabaseService(Session)
-    # avg_visibility_service = AverageVisibilityQueueService(ironmq_client, queue_name, database_service)
+    queue_name = "csca5028"
+    database_service = DatabaseService(Session)
+    queue_service = QueueService(ironmq_client, queue_name, database_service)
 
-    # avg_visibility_service.listen_for_messages()
+    queue_service.listen_and_update()
