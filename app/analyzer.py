@@ -60,21 +60,22 @@
 #             yield message['body']
 #             self.mq_client.queue(self.queue_name).delete(message['id'])
 
-# if __name__ == "__main__":
-#     DATABASE_URL = os.environ["DATABASE_URL"]
-#     engine = create_engine(DATABASE_URL)
-#     Session = sessionmaker(bind=engine)
+if __name__ == "__main__":
+    print("Hello, world!")
+    # DATABASE_URL = os.environ["DATABASE_URL"]
+    # engine = create_engine(DATABASE_URL)
+    # Session = sessionmaker(bind=engine)
 
-#     Base.metadata.create_all(engine)
+    # Base.metadata.create_all(engine)
 
-#     ironmq_client = IronMQ(
-#         host=os.environ["IRON_MQ_HOST"],
-#         project_id=os.environ["IRON_MQ_PROJECT_ID"],
-#         token=os.environ["IRON_MQ_TOKEN"]
-#     )
+    # ironmq_client = IronMQ(
+    #     host=os.environ["IRON_MQ_HOST"],
+    #     project_id=os.environ["IRON_MQ_PROJECT_ID"],
+    #     token=os.environ["IRON_MQ_TOKEN"]
+    # )
 
-#     queue_name = "csca5028"
-#     database_service = DatabaseService(Session)
-#     avg_visibility_service = AverageVisibilityQueueService(ironmq_client, queue_name, database_service)
+    # queue_name = "csca5028"
+    # database_service = DatabaseService(Session)
+    # avg_visibility_service = AverageVisibilityQueueService(ironmq_client, queue_name, database_service)
 
-#     avg_visibility_service.listen_for_messages()
+    # avg_visibility_service.listen_for_messages()
