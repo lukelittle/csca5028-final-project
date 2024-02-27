@@ -12,6 +12,10 @@ from sqlalchemy import Column, Integer, String, Date, Float
 
 logging.basicConfig(level=logging.DEBUG)
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 Base = declarative_base()
 
 class VisibilityData(Base):
@@ -77,7 +81,7 @@ class DataCollector:
         self.db_session.commit()
 
 if __name__ == "__main__":
-    engine = create_engine(os.getenv("DATABASE_URL"))
+    engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     Base.metadata.create_all(engine)
     session = Session()

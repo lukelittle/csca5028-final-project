@@ -9,6 +9,10 @@ from sqlalchemy import Column, Integer, String, Date, Float
 
 logging.basicConfig(level=logging.DEBUG)
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 Base = declarative_base()
 
 class VisibilityData(Base):
@@ -82,7 +86,6 @@ class QueueService:
             self.mq_client.queue(self.queue_name).delete(message['id'])
 
 if __name__ == "__main__":
-    DATABASE_URL = os.environ["DATABASE_URL"]
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
 
