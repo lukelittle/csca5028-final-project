@@ -92,7 +92,7 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
 
     ironmq_client = IronMQ(
-        host=os.environ["IRON_MQ_HOST"],
+        host="mq-aws-eu-west-1-1.iron.io",
         project_id=os.environ["IRON_MQ_PROJECT_ID"],
         token=os.environ["IRON_MQ_TOKEN"]
     )

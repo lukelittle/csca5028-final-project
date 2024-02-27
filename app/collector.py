@@ -86,7 +86,7 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     session = Session()
 
-    ironmq_client = IronMQ(host=os.getenv("IRON_MQ_HOST"), project_id=os.getenv("IRON_MQ_PROJECT_ID"), token=os.getenv("IRON_MQ_TOKEN"))
+    ironmq_client = IronMQ(host="mq-aws-eu-west-1-1.iron.io", project_id=os.getenv("IRON_MQ_PROJECT_ID"), token=os.getenv("IRON_MQ_TOKEN"))
     queue_service = QueueService(ironmq_client, "your-queue-name")
 
     data_collector = DataCollector(queue_service, session)
