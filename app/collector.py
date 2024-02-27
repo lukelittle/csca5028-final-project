@@ -61,6 +61,7 @@ class DataCollector:
         if visibility is not None:
             self.update_db(station_code, visibility)
             self.queue_service.publish_message(json.dumps({'station_code': station_code}))
+            logging.info(f"Published station {station_code}")
 
     @staticmethod
     def get_visibility(station_code):
