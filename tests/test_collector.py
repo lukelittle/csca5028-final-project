@@ -33,7 +33,7 @@ class TestDataCollector(unittest.TestCase):
 
     @patch('app.collector.DataCollector.get_visibility', return_value=10.0)
     def test_fetch_and_update_visibility_success(self, get_visibility_mock):
-        station_code = "TEST_CODE"
+        station_code = "KJFK"
         self.db_session_mock.query.return_value.filter_by.return_value.first.return_value = None
         self.data_collector.fetch_and_update_visibility(station_code)
         self.db_session_mock.add.assert_called()
@@ -42,7 +42,7 @@ class TestDataCollector(unittest.TestCase):
 
     @patch('app.collector.DataCollector.get_visibility', return_value=None)
     def test_fetch_and_update_visibility_none(self, get_visibility_mock):
-        station_code = "TEST_CODE"
+        station_code = "KJFK"
         self.data_collector.fetch_and_update_visibility(station_code)
         self.db_session_mock.add.assert_not_called()
         self.queue_service_mock.publish_message.assert_not_called()
