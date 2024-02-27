@@ -3,39 +3,34 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import os
-from sqlalchemy import Column, Integer, String, Date, Float
-from sqlalchemy.ext.declarative import declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-Base = declarative_base()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-class VisibilityData(Base):
+class VisibilityData(db.Model):
     __tablename__ = 'visibility_data'
-    id = Column(Integer, primary_key=True)
-    station = Column(String, nullable=False)
-    date = Column(Date, nullable=False)
-    visibility = Column(Float)
+    id = db.Column(db.Integer, primary_key=True)
+    station = db.Column(db.String, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    visibility = db.Column(db.Float)
 
     def __repr__(self):
         return f"<VisibilityData(station='{self.station}', date='{self.date}', visibility={self.visibility})>"
 
-class ThreeDayAverageVisibility(Base):
+class ThreeDayAverageVisibility(db.Model):
     __tablename__ = 'three_day_average_visibility'
-    id = Column(Integer, primary_key=True)
-    station = Column(String, nullable=False)
-    average_visibility = Column(Float)
+    id = db.Column(db.Integer, primary_key=True)
+    station = db.Column(db.String, nullable=False)
+    average_visibility = db.Column(db.Float)
 
     def __repr__(self):
         return f"<ThreeDayAverageVisibility(station='{self.station}', average_visibility={self.average_visibility})>"
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
 @app.route("/")
 def main():
@@ -45,7 +40,6 @@ def main():
 def query_visibility():
     station_code = request.args.get('station')
     if station_code:
-    
         results = ThreeDayAverageVisibility.query.filter_by(station=station_code).all()
         return render_template('results.html', results=results, station=station_code)
     else:
