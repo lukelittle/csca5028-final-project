@@ -79,7 +79,7 @@ class QueueService:
                 self.db_service.update_avg_visibility()
 
     def get_messages(self):
-        response = self.mq_client.queue(self.queue_name).get()
+        response = self.mq_client.queue(self.queue_name).reserve(delete=True)
         messages = response.get('messages', [])
         for message in messages:
             logging.info(f"Received message: {message['id']}")
